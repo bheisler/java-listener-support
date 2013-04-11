@@ -30,33 +30,28 @@ import com.google.common.collect.AbstractIterator;
  * listeners on a FilteredCollectionHolder is not permitted.
  */
 @RequiredArgsConstructor
-class FilteredCollectionHolder<T> implements CollectionHolder<T>
-{
+class FilteredCollectionHolder<T> implements CollectionHolder<T> {
 
     private final CollectionHolder<T> base;
     private final ListenerFilter<T> filter;
 
     @Override
-    public Iterator<T> iterator( )
-    {
+    public Iterator<T> iterator( ) {
         return new FilteredIterator( base.iterator( ), filter );
     }
 
     @Override
-    public void registerListener( T listener )
-    {
+    public void registerListener( T listener ) {
         throw new UnsupportedOperationException( "Can't insert elements into a filtered collection holder. ");
     }
 
     @Override
-    public void unregisterListener( T listener )
-    {
+    public void unregisterListener( T listener ) {
         throw new UnsupportedOperationException( "Can't insert elements into a filtered collection holder. ");
     }
 
     @Override
-    public int size( )
-    {
+    public int size( ) {
         int size = 0;
 
         for ( T listener : base ) {
@@ -75,8 +70,7 @@ class FilteredCollectionHolder<T> implements CollectionHolder<T>
         private final ListenerFilter<T> filter;
 
         @Override
-        protected T computeNext( )
-        {
+        protected T computeNext( ) {
             while ( base.hasNext( ) ) {
                 T listener = base.next( );
                 if ( filter.passesFilter( listener ) ) {

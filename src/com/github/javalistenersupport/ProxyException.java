@@ -25,32 +25,26 @@ package com.github.javalistenersupport;
  * event that a proxying operation fails.
  *
  */
-public class ProxyException extends RuntimeException
-{
+public class ProxyException extends RuntimeException {
 
-    public ProxyException( )
-    {
+    public ProxyException( ) {
         super( );
     }
 
     public ProxyException( String message, Throwable cause,
-            boolean enableSuppression, boolean writableStackTrace )
-    {
+            boolean enableSuppression, boolean writableStackTrace ) {
         super( message, cause, enableSuppression, writableStackTrace );
     }
 
-    public ProxyException( String message, Throwable cause )
-    {
+    public ProxyException( String message, Throwable cause ) {
         super( message, cause );
     }
 
-    public ProxyException( String message )
-    {
+    public ProxyException( String message ) {
         super( message );
     }
 
-    public ProxyException( Throwable cause )
-    {
+    public ProxyException( Throwable cause ) {
         super( cause );
     }
 

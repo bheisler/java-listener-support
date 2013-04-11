@@ -27,8 +27,7 @@ import com.github.javalistenersupport.ListenerSupport;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-public class Test
-{
+public class Test {
     private static final ListenerSupport<TestListener> support = ListenerSupport.create( TestListener.class );
     private static final List<TestListener> memory = new ArrayList<>( 10000 );
 
@@ -47,22 +46,19 @@ public class Test
         @Getter private final int num;
 
         @Override
-        public void testEvent( )
-        {
+        public void testEvent( ) {
             System.out.println( num );
         }
 
     }
 
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) {
         Test test = new Test();
 
         ListenerFilter<TestListener> filter = new ListenerFilter<TestListener>( ) {
 
             @Override
-            public boolean passesFilter( TestListener listener )
-            {
+            public boolean passesFilter( TestListener listener ) {
                 if ( listener instanceof TestListenerImpl ) {
                     TestListenerImpl impl = (TestListenerImpl) listener;
                     return impl.getNum( ) % 2 == 1;

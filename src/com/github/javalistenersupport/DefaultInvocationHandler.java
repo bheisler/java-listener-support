@@ -32,14 +32,12 @@ import lombok.RequiredArgsConstructor;
  * override this.
  */
 @RequiredArgsConstructor
-public class DefaultInvocationHandler<T> implements InvocationHandler
-{
+public class DefaultInvocationHandler<T> implements InvocationHandler {
     @Getter private final Iterable<T> listeners;
 
     @Override
     public Object invoke( Object proxy, Method method, Object[] args )
-            throws Throwable
-            {
+            throws Throwable {
         doIteration( method, args );
         return null;
             }
@@ -64,8 +62,7 @@ public class DefaultInvocationHandler<T> implements InvocationHandler
         try {
             method.invoke( listener, args );
         }
-        catch ( InvocationTargetException e )
-        {
+        catch ( InvocationTargetException e ) {
             throw e.getTargetException( );
         }
     }
@@ -83,8 +80,7 @@ public class DefaultInvocationHandler<T> implements InvocationHandler
         private final Object[] args;
 
         @Override
-        public void run( )
-        {
+        public void run( ) {
             try {
                 doIteration( method, args );
             }

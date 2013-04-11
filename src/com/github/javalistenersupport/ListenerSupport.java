@@ -48,8 +48,7 @@ import lombok.Getter;
  * The default collection handlers {@link CopyOnWriteSetHolder} and
  * {@link WeakCollectionHolder} are both thread-safe.
  */
-public final class ListenerSupport<T> implements Iterable<T>
-{
+public final class ListenerSupport<T> implements Iterable<T> {
     @Getter private final Class<T> listenerClass;
 
     private final Class<T> proxyClass;
@@ -62,8 +61,7 @@ public final class ListenerSupport<T> implements Iterable<T>
      * should suffice for the majority of users.
      */
     @SuppressWarnings( "unchecked" )
-    public ListenerSupport( Class<T> listenerClass, CollectionHolder<T> holder )
-    {
+    public ListenerSupport( Class<T> listenerClass, CollectionHolder<T> holder ) {
         assert( listenerClass.isInterface( ) ) : "Must use a listener interface.";
         this.listenerClass = listenerClass;
         this.proxyClass = (Class<T>)Proxy.getProxyClass( listenerClass.getClassLoader( ), listenerClass );
@@ -88,13 +86,11 @@ public final class ListenerSupport<T> implements Iterable<T>
     }
 
     @Override
-    public Iterator<T> iterator( )
-    {
+    public Iterator<T> iterator( ) {
         return collection.iterator( );
     }
 
-    public int size( )
-    {
+    public int size( ) {
         return collection.size( );
     }
 
@@ -178,14 +174,12 @@ public final class ListenerSupport<T> implements Iterable<T>
     }
 
     private T getProxy( DefaultInvocationHandler<T> handler ) {
-        try
-        {
+        try {
             return proxyClass.getConstructor( InvocationHandler.class ).newInstance( handler );
         }
         catch ( InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e )
-        {
+                | NoSuchMethodException | SecurityException e ) {
             throw new ProxyException( e );
         }
     }

@@ -23,8 +23,7 @@ package com.github.javalistenersupport;
 /**
  * Interface for classes that hold collections of listeners.
  */
-public interface CollectionHolder<T> extends Iterable<T>
-{
+public interface CollectionHolder<T> extends Iterable<T> {
     /**
      * Add a new listener to the collection
      */

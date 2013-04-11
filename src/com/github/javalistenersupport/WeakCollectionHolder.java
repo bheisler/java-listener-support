@@ -40,23 +40,20 @@ import com.google.common.collect.AbstractIterator;
  * <br>
  * This class is thread-safe.
  */
-class WeakCollectionHolder<T> implements CollectionHolder<T>
-{
+class WeakCollectionHolder<T> implements CollectionHolder<T> {
 
     private final CopyOnWriteArraySet<WeakReference<T>> listeners = new CopyOnWriteArraySet<>( );
 
     private final ReferenceQueue<T> referenceQueue = new ReferenceQueue<>( );
 
     @Override
-    public void registerListener( T listener )
-    {
+    public void registerListener( T listener ) {
         Preconditions.checkNotNull( listener );
         listeners.add( new WeakReference<T>( listener, referenceQueue ) );
     }
 
     @Override
-    public void unregisterListener( T listener )
-    {
+    public void unregisterListener( T listener ) {
         for ( WeakReference<T> ref : listeners ) {
             if ( listener == ref.get( ) ) {
                 listeners.remove( ref );
@@ -76,16 +73,14 @@ class WeakCollectionHolder<T> implements CollectionHolder<T>
     }
 
     @Override
-    public Iterator<T> iterator( )
-    {
+    public Iterator<T> iterator( ) {
         cleanup();
         return new WeakReferenceIterator( listeners.iterator( ) );
     }
 
 
     @Override
-    public int size( )
-    {
+    public int size( ) {
         cleanup();
         return listeners.size( );
     }
@@ -96,8 +91,7 @@ class WeakCollectionHolder<T> implements CollectionHolder<T>
         private final Iterator<WeakReference<T>> base;
 
         @Override
-        protected T computeNext( )
-        {
+        protected T computeNext( ) {
             while ( base.hasNext( ) ) {
                 WeakReference<T> ref = base.next( );
                 T listener = ref.get( );

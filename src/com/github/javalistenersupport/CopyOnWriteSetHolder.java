@@ -30,48 +30,40 @@ import com.google.common.collect.ForwardingIterator;
  * <br>
  * This class is thread-safe.
  */
-class CopyOnWriteSetHolder<T> implements CollectionHolder<T>
-{
+class CopyOnWriteSetHolder<T> implements CollectionHolder<T> {
     private final CopyOnWriteArraySet<T> listeners = new CopyOnWriteArraySet<>( );
 
     @Override
-    public void registerListener( T listener )
-    {
+    public void registerListener( T listener ) {
         listeners.add( listener );
     }
 
     @Override
-    public void unregisterListener( T listener )
-    {
+    public void unregisterListener( T listener ) {
         listeners.remove( listener );
     }
 
     @Override
-    public Iterator<T> iterator( )
-    {
+    public Iterator<T> iterator( ) {
         return new UnmodifiableIterator( listeners.iterator( ) );
     }
 
     @Override
-    public int size( )
-    {
+    public int size( ) {
         return listeners.size( );
     }
 
     @RequiredArgsConstructor
-    private final class UnmodifiableIterator extends ForwardingIterator<T>
-    {
+    private final class UnmodifiableIterator extends ForwardingIterator<T> {
         private final Iterator<T> delegate;
 
         @Override
-        protected Iterator<T> delegate( )
-        {
+        protected Iterator<T> delegate( ) {
             return delegate;
         }
 
         @Override
-        public void remove( )
-        {
+        public void remove( ) {
             throw new UnsupportedOperationException( );
         }
 

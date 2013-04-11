@@ -32,19 +32,16 @@ import lombok.RequiredArgsConstructor;
  * Invocation handler that invokes listeners on several worker threads
  * using the Fork/Join framework.
  */
-class ParallelInvocationHandler<T> extends DefaultInvocationHandler<T>
-{
+class ParallelInvocationHandler<T> extends DefaultInvocationHandler<T> {
 
     private final ForkJoinPool pool = new ForkJoinPool( );
 
-    public ParallelInvocationHandler( Iterable<T> listeners )
-    {
+    public ParallelInvocationHandler( Iterable<T> listeners ) {
         super( listeners );
     }
 
     @Override
-    protected void doIteration( Method method, Object[] args ) throws Throwable
-    {
+    protected void doIteration( Method method, Object[] args ) throws Throwable {
         pool.submit( new InvocationAction( getListeners( ), method, args ) );
     }
 
@@ -56,8 +53,7 @@ class ParallelInvocationHandler<T> extends DefaultInvocationHandler<T>
         private final Object[] args;
 
         @Override
-        protected void compute( )
-        {
+        protected void compute( ) {
             List<ForkJoinTask<?>> tasks = new ArrayList<>( );
             for ( T listener : listeners ) {
                 tasks.add( new SingleInvocationTask( listener, method, args ) );
@@ -75,8 +71,7 @@ class ParallelInvocationHandler<T> extends DefaultInvocationHandler<T>
         private final Object[] args;
 
         @Override
-        public void compute( )
-        {
+        public void compute( ) {
             try {
                 invokeMethod( listener, method, args );
             }
