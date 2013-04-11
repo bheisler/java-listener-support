@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2012 Brook Heisler
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in the
+ * Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.github.javalistenersupport;
 
 import java.lang.reflect.InvocationHandler;
@@ -11,12 +31,12 @@ import lombok.Getter;
  * ListenerSupport handles the thread safety issues and uses dynamic proxying to
  * make it easy to fire events. This class implements Iterable<T> in order to allow
  * client code to iterate over the contained listeners if necessary.<p>
- * 
+ *
  * Clients should ensure that listeners will not throw exceptions (which is generally
  * good practice anyway). An exception thrown by a listener will, unless otherwise
  * noted, terminate iteration of the listeners. The specific exception handling
  * behavior of each fire method will be noted in the documentation for that method.<p>
- * 
+ *
  * Example Usage:<br><code>
  * ListenerSupport&lt;MyListener&gt; support = new ListenerSupport&lt;&gt;(MyListener.class);<br>
  * support.fire().myListenerMethod();<br>
@@ -82,7 +102,7 @@ public final class ListenerSupport<T> implements Iterable<T>
      * Returns a proxy listener that will forward all method calls to all listeners.
      * This method fires events on the calling thread. Any exceptions thrown by
      * listeners will be propagated from this method.<br>
-     * 
+     *
      * Note that this method, like all of the fire methods, uses reflection-based
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
@@ -95,7 +115,7 @@ public final class ListenerSupport<T> implements Iterable<T>
      * Returns a proxy listener that will forward all method calls to all listeners.
      * This method fires events asynchronously on the event dispatch thread. <b>Any
      * exceptions thrown by listeners will be printed to System.err and then ignored!</b><br>
-     * 
+     *
      * Note that this method, like all of the fire methods, uses reflection-based
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
@@ -108,7 +128,7 @@ public final class ListenerSupport<T> implements Iterable<T>
      * Returns a proxy listener that will forward all method calls to all listeners.
      * This method fires events synchronously on the event dispatch thread. Any
      * exceptions thrown by listeners will be rethrown on the calling thread.<br>
-     * 
+     *
      * Note that this method, like all of the fire methods, uses reflection-based
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
@@ -121,7 +141,7 @@ public final class ListenerSupport<T> implements Iterable<T>
      * Returns a proxy listener that will forward all method calls to all listeners.
      * This method fires events asynchronously on a worker thread. <b>Any
      * exceptions thrown by listeners will be printed to System.err and then ignored!</b><br>
-     * 
+     *
      * Note that this method, like all of the fire methods, uses reflection-based
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
@@ -137,7 +157,7 @@ public final class ListenerSupport<T> implements Iterable<T>
      * to System.err and then ignored, but will not prevent other listeners from
      * being executed.</b> This proxy method is best suited for large numbers of
      * listeners or listeners which are expected to take a long time.<br>
-     * 
+     *
      * Note that this method, like all of the fire methods, uses reflection-based
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
