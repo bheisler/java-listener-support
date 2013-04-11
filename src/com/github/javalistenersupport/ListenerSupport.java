@@ -187,19 +187,20 @@ public final class ListenerSupport<T> implements Iterable<T>
 
     /**
      * Returns a ListenerSupport backed by a CopyOnWriteArraySet of listeners.
+     * Listeners are strongly-referenced and must be unregistered manually.
      * This should be sufficient for most uses. ListenerSupports returned from
      * this method are thread-safe.
      */
-    public static <T> ListenerSupport<T> newListenerSupport( Class<T> listenerClass ) {
+    public static <T> ListenerSupport<T> create( Class<T> listenerClass ) {
         return new ListenerSupport<T>( listenerClass, new CopyOnWriteSetHolder<T>( ) );
     }
 
     /**
      * Returns a ListenerSupport backed by a CopyOnWriteArraySet of WeakReferences
-     * to listeners. Listeners will be removed automatically as they become Weakly
+     * to listeners. Listeners will be removed automatically as they become weakly
      * reachable. ListenerSupports returned from this method are thread-safe.
      */
-    public static <T> ListenerSupport<T> newWeakListenerSupport( Class<T> listenerClass ) {
+    public static <T> ListenerSupport<T> createWeak( Class<T> listenerClass ) {
         return new ListenerSupport<T>( listenerClass, new WeakCollectionHolder<T>( ) );
     }
 }

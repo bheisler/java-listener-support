@@ -20,7 +20,6 @@
  */
 package com.github.javalistenersupport;
 
-import static com.github.javalistenersupport.ListenerSupport.newListenerSupport;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.javalistenersupport.ListenerFilter;
@@ -30,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 public class Test
 {
-    private static final ListenerSupport<TestListener> support = newListenerSupport( TestListener.class );
+    private static final ListenerSupport<TestListener> support = ListenerSupport.create( TestListener.class );
     private static final List<TestListener> memory = new ArrayList<>( 10000 );
 
     static {
