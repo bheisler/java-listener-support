@@ -54,6 +54,20 @@ class FilteredCollectionHolder<T> implements CollectionHolder<T>
         throw new UnsupportedOperationException( "Can't insert elements into a filtered collection holder. ");
     }
 
+    @Override
+    public int size( )
+    {
+        int size = 0;
+
+        for ( T listener : base ) {
+            if ( filter.passesFilter( listener ) ) {
+                size++;
+            }
+        }
+
+        return size;
+    }
+
     @RequiredArgsConstructor
     private class FilteredIterator extends AbstractIterator<T> {
 

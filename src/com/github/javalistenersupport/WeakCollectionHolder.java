@@ -82,6 +82,14 @@ class WeakCollectionHolder<T> implements CollectionHolder<T>
         return new WeakReferenceIterator( listeners.iterator( ) );
     }
 
+
+    @Override
+    public int size( )
+    {
+        cleanup();
+        return listeners.size( );
+    }
+
     @RequiredArgsConstructor
     private final class WeakReferenceIterator extends AbstractIterator<T> {
 

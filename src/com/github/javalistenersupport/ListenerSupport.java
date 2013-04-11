@@ -93,6 +93,11 @@ public final class ListenerSupport<T> implements Iterable<T>
         return collection.iterator( );
     }
 
+    public int size( )
+    {
+        return collection.size( );
+    }
+
     /**
      * Returns a filtered view of the current ListenerSupport which can be used
      * to fire events to only a subset of listeners. Registrations made in this

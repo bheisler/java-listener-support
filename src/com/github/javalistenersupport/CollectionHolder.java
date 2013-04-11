@@ -33,4 +33,6 @@ public interface CollectionHolder<T> extends Iterable<T>
     /** Remove a listener from the collection */
     void unregisterListener( T listener );
 
+    /** Return the number of registered listeners */
+    int size();
 }

@@ -52,6 +52,12 @@ class CopyOnWriteSetHolder<T> implements CollectionHolder<T>
         return new UnmodifiableIterator( listeners.iterator( ) );
     }
 
+    @Override
+    public int size( )
+    {
+        return listeners.size( );
+    }
+
     @RequiredArgsConstructor
     private final class UnmodifiableIterator extends ForwardingIterator<T>
     {
