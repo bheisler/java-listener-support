@@ -20,10 +20,13 @@
  */
 package com.github.javalistenersupport;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import lombok.Getter;
 
 /**
@@ -49,6 +52,8 @@ import lombok.Getter;
  * {@link WeakCollectionHolder} are both thread-safe.
  */
 public final class ListenerSupport<T> implements Iterable<T> {
+    private final Map<Class<?>, T> proxyCache = new HashMap<>();
+
     @Getter private final Class<T> listenerClass;
 
     private final Class<T> proxyClass;
@@ -114,8 +119,10 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
+    @SuppressWarnings( "unchecked" )
     public T fire() {
-        return getProxy( new DefaultInvocationHandler<>( collection ) );
+        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
+                DefaultInvocationHandler.class );
     }
 
     /**
@@ -127,8 +134,10 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
+    @SuppressWarnings( "unchecked" )
     public T fireOnEdtLater() {
-        return getProxy( new EdtLaterInvocationHandler<T>( collection ) );
+        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
+                EdtLaterInvocationHandler.class );
     }
 
     /**
@@ -140,8 +149,10 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
+    @SuppressWarnings( "unchecked" )
     public T fireOnEdtAndWait() {
-        return getProxy( new EdtAndWaitInvocationHandler<T>( collection ) );
+        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
+                EdtAndWaitInvocationHandler.class );
     }
 
     /**
@@ -153,8 +164,10 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
+    @SuppressWarnings( "unchecked" )
     public T fireOnWtLater() {
-        return getProxy( new WtLaterInvocationHandler<T>( collection ) );
+        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
+                WtLaterInvocationHandler.class );
     }
 
     /**
@@ -169,8 +182,43 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
+    @SuppressWarnings( "unchecked" )
     public T fireInParallel() {
-        return getProxy( new ParallelInvocationHandler<T>( collection ) );
+        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
+                ParallelInvocationHandler.class );
+    }
+
+    /**
+     * Returns a proxy listener that will forward all method calls to all listeners
+     * using the given proxy. The exception-handling and thread-safety of the
+     * given handler are entirely dependent on the definition of the handler.
+     *
+     * Note that this method, like all of the fire methods, uses reflection-based
+     * proxying and is likely unsuitable for high-performance or high-security
+     * environments.
+     */
+    protected T fireWithHandler( Class<? extends DefaultInvocationHandler<T>> cls ) {
+        return getProxy( cls );
+    }
+
+    private T getProxy( Class<? extends DefaultInvocationHandler<T>> cls ) {
+        if ( proxyCache.containsKey( cls ) ) {
+            return proxyCache.get( cls );
+        }
+
+        try {
+            Constructor<? extends DefaultInvocationHandler<T>> constructor =
+                    cls.getConstructor( Iterable.class );
+            DefaultInvocationHandler<T> instance = constructor.newInstance( collection );
+            T proxy = getProxy( instance );
+            proxyCache.put( cls, proxy );
+            return proxy;
+        }
+        catch ( NoSuchMethodException | SecurityException | InstantiationException
+                | IllegalAccessException | IllegalArgumentException |
+                InvocationTargetException e ) {
+            throw new ProxyException(e);
+        }
     }
 
     private T getProxy( DefaultInvocationHandler<T> handler ) {
