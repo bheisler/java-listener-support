@@ -37,6 +37,8 @@ import com.google.common.collect.AbstractIterator;
  * to never return a null reference. Clients may not insert a null
  * reference. The collection is cleaned of dead references before
  * returning from iterator().
+ * <br>
+ * This class is thread-safe.
  */
 class WeakCollectionHolder<T> implements CollectionHolder<T>
 {

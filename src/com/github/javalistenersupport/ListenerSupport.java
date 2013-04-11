@@ -43,6 +43,10 @@ import lombok.Getter;
  * support.fireOnEdtLater().myListenerMethod2( MyEventObject obj );<br>
  * support.filter(new MyFilter1()).filter(new MyFilter2()).fire().myListenerMethod();<br>
  * </code>
+ * <br>
+ * This class is thread-safe if and only if the collection handler is thread safe.
+ * The default collection handlers {@link CopyOnWriteSetHolder} and
+ * {@link WeakCollectionHolder} are both thread-safe.
  */
 public final class ListenerSupport<T> implements Iterable<T>
 {
@@ -91,7 +95,9 @@ public final class ListenerSupport<T> implements Iterable<T>
 
     /**
      * Returns a filtered view of the current ListenerSupport which can be used
-     * to fire events to only a subset of listeners.
+     * to fire events to only a subset of listeners. Registrations made in this
+     * ListenerSupport will be reflected in the returned view, but listeners
+     * cannot be registered or unregistered with the view.
      */
     public ListenerSupport<T> filter( ListenerFilter<T> filter ) {
         return new ListenerSupport<T>( listenerClass, proxyClass,
@@ -181,7 +187,8 @@ public final class ListenerSupport<T> implements Iterable<T>
 
     /**
      * Returns a ListenerSupport backed by a CopyOnWriteArraySet of listeners.
-     * This should be sufficient for most uses.
+     * This should be sufficient for most uses. ListenerSupports returned from
+     * this method are thread-safe.
      */
     public static <T> ListenerSupport<T> newListenerSupport( Class<T> listenerClass ) {
         return new ListenerSupport<T>( listenerClass, new CopyOnWriteSetHolder<T>( ) );
@@ -190,7 +197,7 @@ public final class ListenerSupport<T> implements Iterable<T>
     /**
      * Returns a ListenerSupport backed by a CopyOnWriteArraySet of WeakReferences
      * to listeners. Listeners will be removed automatically as they become Weakly
-     * reachable.
+     * reachable. ListenerSupports returned from this method are thread-safe.
      */
     public static <T> ListenerSupport<T> newWeakListenerSupport( Class<T> listenerClass ) {
         return new ListenerSupport<T>( listenerClass, new WeakCollectionHolder<T>( ) );

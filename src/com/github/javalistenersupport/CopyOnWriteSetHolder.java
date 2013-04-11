@@ -26,7 +26,9 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.collect.ForwardingIterator;
 
 /**
- * Default CollectionHolder.
+ * Default CollectionHolder. Holds listeners in a CopyOnWriteArraySet.
+ * <br>
+ * This class is thread-safe.
  */
 class CopyOnWriteSetHolder<T> implements CollectionHolder<T>
 {
