@@ -119,10 +119,8 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
-    @SuppressWarnings( "unchecked" )
     public T fire() {
-        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
-                DefaultInvocationHandler.class );
+        return getProxy( DefaultInvocationHandler.class );
     }
 
     /**
@@ -134,10 +132,8 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
-    @SuppressWarnings( "unchecked" )
     public T fireOnEdtLater() {
-        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
-                EdtLaterInvocationHandler.class );
+        return getProxy( EdtLaterInvocationHandler.class );
     }
 
     /**
@@ -149,10 +145,8 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
-    @SuppressWarnings( "unchecked" )
     public T fireOnEdtAndWait() {
-        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
-                EdtAndWaitInvocationHandler.class );
+        return getProxy( EdtAndWaitInvocationHandler.class );
     }
 
     /**
@@ -164,10 +158,8 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
-    @SuppressWarnings( "unchecked" )
     public T fireOnWtLater() {
-        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
-                WtLaterInvocationHandler.class );
+        return getProxy( WtLaterInvocationHandler.class );
     }
 
     /**
@@ -182,10 +174,8 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * proxying and is likely unsuitable for high-performance or high-security
      * environments.
      */
-    @SuppressWarnings( "unchecked" )
     public T fireInParallel() {
-        return getProxy( (Class<? extends DefaultInvocationHandler<T>>)
-                ParallelInvocationHandler.class );
+        return getProxy( ParallelInvocationHandler.class );
     }
 
     /**
@@ -201,7 +191,14 @@ public final class ListenerSupport<T> implements Iterable<T> {
         return getProxy( cls );
     }
 
-    private T getProxy( Class<? extends DefaultInvocationHandler<T>> cls ) {
+    private T getProxy( Class<?> clas ) {
+        
+        assert DefaultInvocationHandler.class.isAssignableFrom( clas );
+        
+        @SuppressWarnings( "unchecked" )
+        Class<? extends DefaultInvocationHandler<T>> cls = 
+                (Class<? extends DefaultInvocationHandler<T>>) clas;
+        
         if ( proxyCache.containsKey( cls ) ) {
             return proxyCache.get( cls );
         }

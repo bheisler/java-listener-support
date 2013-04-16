@@ -2,3 +2,6 @@
 .classpath
 .settings
 bin
+build
+dist
+javadoc

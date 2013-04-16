@@ -1,0 +1,31 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.redattack34</groupId>
+  <artifactId>java-listener-support</artifactId>
+  <version>21.3</version>
+  <packaging>jar</packaging>
+
+  <name>java-listener-support</name>
+  <description>A very simple tool to make it easier to implement the Listener pattern in Java</description>
+  <url>https://github.com/Redattack34/java-listener-support</url>
+
+  <licenses>
+    <license>
+      <name>MIT license</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/Redattack34/java-listener-support</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>[11.0,)</version>
+    </dependency>
+    ...
+  </dependencies>
+</project>
