@@ -18,23 +18,24 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.javalistenersupport;
+package com.castlebravostudios.listenersupport;
 
 import java.lang.reflect.Method;
+import javax.swing.SwingUtilities;
 
 /**
  * This is an InvocationHandler that ensures that listener methods are always called
- * asynchronously on a worker thread.
+ * asynchronously on the event dispatch thread.
  */
-class WtLaterInvocationHandler<T> extends DefaultInvocationHandler<T> {
-    public WtLaterInvocationHandler( Iterable<T> listeners ) {
+class EdtLaterInvocationHandler<T> extends DefaultInvocationHandler<T> {
+
+    public EdtLaterInvocationHandler( Iterable<T> listeners ) {
         super( listeners );
     }
 
     @Override
     protected void doIteration( final Method method, final Object[] args ) throws Throwable {
-        Runnable wtRunnable = new InvocationHandlerRunnable( method, args );
-        new Thread( wtRunnable ).start( );
-
+        Runnable edtRunnable = new InvocationHandlerRunnable( method, args );
+        SwingUtilities.invokeLater( edtRunnable );
     }
 }

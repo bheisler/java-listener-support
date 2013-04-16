@@ -18,20 +18,23 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.javalistenersupport;
+package com.castlebravostudios.listenersupport;
+
+import java.lang.reflect.Method;
 
 /**
- * Interface for classes that hold collections of listeners.
+ * This is an InvocationHandler that ensures that listener methods are always called
+ * asynchronously on a worker thread.
  */
-public interface CollectionHolder<T> extends Iterable<T> {
-    /**
-     * Add a new listener to the collection
-     */
-    void registerListener( T listener );
+class WtLaterInvocationHandler<T> extends DefaultInvocationHandler<T> {
+    public WtLaterInvocationHandler( Iterable<T> listeners ) {
+        super( listeners );
+    }
 
-    /** Remove a listener from the collection */
-    void unregisterListener( T listener );
+    @Override
+    protected void doIteration( final Method method, final Object[] args ) throws Throwable {
+        Runnable wtRunnable = new InvocationHandlerRunnable( method, args );
+        new Thread( wtRunnable ).start( );
 
-    /** Return the number of registered listeners */
-    int size();
+    }
 }

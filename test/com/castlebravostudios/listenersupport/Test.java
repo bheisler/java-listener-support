@@ -18,12 +18,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.javalistenersupport;
+package com.castlebravostudios.listenersupport;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.github.javalistenersupport.ListenerFilter;
-import com.github.javalistenersupport.ListenerSupport;
+import com.castlebravostudios.listenersupport.ListenerFilter;
+import com.castlebravostudios.listenersupport.ListenerSupport;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

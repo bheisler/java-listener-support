@@ -18,24 +18,34 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.javalistenersupport;
-
-import java.lang.reflect.Method;
-import javax.swing.SwingUtilities;
+package com.castlebravostudios.listenersupport;
 
 /**
- * This is an InvocationHandler that ensures that listener methods are always called
- * asynchronously on the event dispatch thread.
+ * This exception will be thrown by the ListenerSupport classes in the unlikely
+ * event that a proxying operation fails.
+ *
  */
-class EdtLaterInvocationHandler<T> extends DefaultInvocationHandler<T> {
+public class ProxyException extends RuntimeException {
 
-    public EdtLaterInvocationHandler( Iterable<T> listeners ) {
-        super( listeners );
+    public ProxyException( ) {
+        super( );
     }
 
-    @Override
-    protected void doIteration( final Method method, final Object[] args ) throws Throwable {
-        Runnable edtRunnable = new InvocationHandlerRunnable( method, args );
-        SwingUtilities.invokeLater( edtRunnable );
+    public ProxyException( String message, Throwable cause,
+            boolean enableSuppression, boolean writableStackTrace ) {
+        super( message, cause, enableSuppression, writableStackTrace );
     }
+
+    public ProxyException( String message, Throwable cause ) {
+        super( message, cause );
+    }
+
+    public ProxyException( String message ) {
+        super( message );
+    }
+
+    public ProxyException( Throwable cause ) {
+        super( cause );
+    }
+
 }
