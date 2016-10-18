@@ -22,8 +22,6 @@ package com.castlebravostudios.listenersupport;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.castlebravostudios.listenersupport.ListenerFilter;
-import com.castlebravostudios.listenersupport.ListenerSupport;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -53,8 +51,6 @@ public class Test {
     }
 
     public static void main( String[] args ) {
-        Test test = new Test();
-
         ListenerFilter<TestListener> filter = new ListenerFilter<TestListener>( ) {
 
             @Override

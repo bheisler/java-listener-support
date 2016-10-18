@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
-import lombok.RequiredArgsConstructor;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A collection holder that holds a set of WeakReferences to listeners.
@@ -49,7 +49,7 @@ class WeakCollectionHolder<T> implements CollectionHolder<T> {
     @Override
     public void registerListener( T listener ) {
         Preconditions.checkNotNull( listener );
-        listeners.add( new WeakReference<T>( listener, referenceQueue ) );
+        listeners.add( new WeakReference<>( listener, referenceQueue ) );
     }
 
     @Override

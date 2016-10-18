@@ -106,8 +106,8 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * cannot be registered or unregistered with the view.
      */
     public ListenerSupport<T> filter( ListenerFilter<T> filter ) {
-        return new ListenerSupport<T>( listenerClass, proxyClass,
-                new FilteredCollectionHolder<T>( collection, filter ) );
+        return new ListenerSupport<>( listenerClass, proxyClass,
+                new FilteredCollectionHolder<>( collection, filter ) );
     }
 
     /**
@@ -192,13 +192,13 @@ public final class ListenerSupport<T> implements Iterable<T> {
     }
 
     private T getProxy( Class<?> clas ) {
-        
+
         assert DefaultInvocationHandler.class.isAssignableFrom( clas );
-        
+
         @SuppressWarnings( "unchecked" )
-        Class<? extends DefaultInvocationHandler<T>> cls = 
+        Class<? extends DefaultInvocationHandler<T>> cls =
                 (Class<? extends DefaultInvocationHandler<T>>) clas;
-        
+
         if ( proxyCache.containsKey( cls ) ) {
             return proxyCache.get( cls );
         }
@@ -236,7 +236,7 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * this method are thread-safe.
      */
     public static <T> ListenerSupport<T> create( Class<T> listenerClass ) {
-        return new ListenerSupport<T>( listenerClass, new CopyOnWriteSetHolder<T>( ) );
+        return new ListenerSupport<>( listenerClass, new CopyOnWriteSetHolder<T>( ) );
     }
 
     /**
@@ -245,6 +245,6 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * reachable. ListenerSupports returned from this method are thread-safe.
      */
     public static <T> ListenerSupport<T> createWeak( Class<T> listenerClass ) {
-        return new ListenerSupport<T>( listenerClass, new WeakCollectionHolder<T>( ) );
+        return new ListenerSupport<>( listenerClass, new WeakCollectionHolder<T>( ) );
     }
 }
