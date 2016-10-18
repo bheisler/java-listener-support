@@ -52,6 +52,8 @@ import lombok.Getter;
  * {@link WeakCollectionHolder} are both thread-safe.
  */
 public final class ListenerSupport<T> implements Iterable<T> {
+    private static final Map<Class<?>, Class<?>> PROXY_CLASS_CACHE = new HashMap<>();
+
     private final Map<Class<?>, T> proxyCache = new HashMap<>();
 
     @Getter private final Class<T> listenerClass;
@@ -65,12 +67,21 @@ public final class ListenerSupport<T> implements Iterable<T> {
      * CollectionHolder. This is not recommended, as the standard holders
      * should suffice for the majority of users.
      */
-    @SuppressWarnings( "unchecked" )
     public ListenerSupport( Class<T> listenerClass, CollectionHolder<T> holder ) {
         assert( listenerClass.isInterface( ) ) : "Must use a listener interface.";
         this.listenerClass = listenerClass;
-        this.proxyClass = (Class<T>)Proxy.getProxyClass( listenerClass.getClassLoader( ), listenerClass );
+        this.proxyClass = getProxyClass( listenerClass );
         this.collection = holder;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private static <T> Class<T> getProxyClass( Class<T> listenerClass ) {
+        if ( PROXY_CLASS_CACHE.containsKey( listenerClass ) ) {
+            return (Class<T>)PROXY_CLASS_CACHE.get( listenerClass );
+        }
+        Class<T> proxyClass = (Class<T>)Proxy.getProxyClass( listenerClass.getClassLoader( ), listenerClass );
+        PROXY_CLASS_CACHE.put( listenerClass, proxyClass );
+        return proxyClass;
     }
 
     /**
