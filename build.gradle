@@ -10,7 +10,7 @@ repositories {
      maven { url "http://repo.maven.apache.org/maven2" }
 }
 dependencies {
-    compile group: 'com.google.guava', name: 'guava', version:'[11.0,)'
+    compile group: 'com.google.guava', name: 'guava', version:'11.0'
     compileOnly "org.projectlombok:lombok:1.16.10"
     testCompileOnly "org.projectlombok:lombok:1.16.10"
 }
