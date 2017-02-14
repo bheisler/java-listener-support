@@ -1,16 +1,80 @@
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'signing'
 
 group = 'com.github.redattack34'
-version = '1.3'
-
-description = """java-listener-support"""
+version = '1.3.1'
 
 repositories {
      maven { url "http://repo.maven.apache.org/maven2" }
 }
 dependencies {
     compile group: 'com.google.guava', name: 'guava', version:'11.0'
+    
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.7.6'
+    
     compileOnly "org.projectlombok:lombok:1.16.10"
     testCompileOnly "org.projectlombok:lombok:1.16.10"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from tasks.javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+              authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom.project {
+               name 'java-listener-support'
+               packaging 'jar'
+               description 'A very simple tool to make it easier to implement the Listener pattern in Java'
+               url 'https://github.com/Redattack34/java-listener-support'
+
+               scm {
+                   url 'https://github.com/Redattack34/java-listener-support'
+                   connection 'scm:git@github.com:Redattack34/java-listener-support.git'
+                   developerConnection 'scm:git@github.com:Redattack34/java-listener-support.git'
+               }
+
+               licenses {
+                   license {
+                       name 'MIT license'
+                       url 'http://www.opensource.org/licenses/mit-license.php'
+                   }
+               }
+
+               developers {
+                   developer {
+                       id 'redattack34'
+                       name 'Brook Heisler'
+                       url 'https://github.com/Redattack34'
+                   }
+               }
+           }
+        }
+    }
 }

@@ -32,7 +32,7 @@ import lombok.Getter;
 /**
  * A class to make implementation of the Observer pattern easier.
  * ListenerSupport handles the thread safety issues and uses dynamic proxying to
- * make it easy to fire events. This class implements Iterable<T> in order to allow
+ * make it easy to fire events. This class implements Iterable&lt;T&gt; in order to allow
  * client code to iterate over the contained listeners if necessary.<p>
  *
  * Clients should ensure that listeners will not throw exceptions (which is generally

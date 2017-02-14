@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
  * If you need to change the way events are dispatched to listeners,
  * override this.
  *
- * All subclasses MUST provide a one-argument constructor that takes an Iterable<T>.
+ * All subclasses MUST provide a one-argument constructor that takes an Iterable&lt;T&gt;.
  */
 @RequiredArgsConstructor
 public class DefaultInvocationHandler<T> implements InvocationHandler {
@@ -42,7 +42,7 @@ public class DefaultInvocationHandler<T> implements InvocationHandler {
             throws Throwable {
         doIteration( method, args );
         return null;
-            }
+    }
 
     /**
      * This method performs the iteration over the listener set. Override this if you
