@@ -20,18 +20,14 @@
  */
 package com.castlebravostudios.listenersupport;
 
-/**
- * Interface for classes that hold collections of listeners.
- */
+/** Interface for classes that hold collections of listeners. */
 public interface CollectionHolder<T> extends Iterable<T> {
-    /**
-     * Add a new listener to the collection
-     */
-    void registerListener( T listener );
+  /** Add a new listener to the collection */
+  void registerListener(T listener);
 
-    /** Remove a listener from the collection */
-    void unregisterListener( T listener );
+  /** Remove a listener from the collection */
+  void unregisterListener(T listener);
 
-    /** Return the number of registered listeners */
-    int size();
+  /** Return the number of registered listeners */
+  int size();
 }

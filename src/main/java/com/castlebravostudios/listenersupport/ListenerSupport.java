@@ -30,232 +30,220 @@ import java.util.Map;
 import lombok.Getter;
 
 /**
- * A class to make implementation of the Observer pattern easier.
- * ListenerSupport handles the thread safety issues and uses dynamic proxying to
- * make it easy to fire events. This class implements Iterable&lt;T&gt; in order to allow
- * client code to iterate over the contained listeners if necessary.<p>
+ * A class to make implementation of the Observer pattern easier. ListenerSupport handles the thread
+ * safety issues and uses dynamic proxying to make it easy to fire events. This class implements
+ * Iterable&lt;T&gt; in order to allow client code to iterate over the contained listeners if
+ * necessary.
  *
- * Clients should ensure that listeners will not throw exceptions (which is generally
- * good practice anyway). An exception thrown by a listener will, unless otherwise
- * noted, terminate iteration of the listeners. The specific exception handling
- * behavior of each fire method will be noted in the documentation for that method.<p>
+ * <p>Clients should ensure that listeners will not throw exceptions (which is generally good
+ * practice anyway). An exception thrown by a listener will, unless otherwise noted, terminate
+ * iteration of the listeners. The specific exception handling behavior of each fire method will be
+ * noted in the documentation for that method.
  *
- * Example Usage:<br><code>
+ * <p>Example Usage:<br>
+ * <code>
  * ListenerSupport&lt;MyListener&gt; support = new ListenerSupport&lt;&gt;(MyListener.class);<br>
  * support.fire().myListenerMethod();<br>
  * support.fireOnEdtLater().myListenerMethod2( MyEventObject obj );<br>
  * support.filter(new MyFilter1()).filter(new MyFilter2()).fire().myListenerMethod();<br>
- * </code>
- * <br>
- * This class is thread-safe if and only if the collection handler is thread safe.
- * The default collection handlers {@link CopyOnWriteSetHolder} and
- * {@link WeakCollectionHolder} are both thread-safe.
+ * </code> <br>
+ * This class is thread-safe if and only if the collection handler is thread safe. The default
+ * collection handlers {@link CopyOnWriteSetHolder} and {@link WeakCollectionHolder} are both
+ * thread-safe.
  */
 public final class ListenerSupport<T> implements Iterable<T> {
-    private static final Map<Class<?>, Class<?>> PROXY_CLASS_CACHE = new HashMap<>();
+  private static final Map<Class<?>, Class<?>> PROXY_CLASS_CACHE = new HashMap<>();
 
-    private final Map<Class<?>, T> proxyCache = new HashMap<>();
+  private final Map<Class<?>, T> proxyCache = new HashMap<>();
 
-    @Getter private final Class<T> listenerClass;
+  @Getter private final Class<T> listenerClass;
 
-    private final Class<T> proxyClass;
+  private final Class<T> proxyClass;
 
-    private final CollectionHolder<T> collection;
+  private final CollectionHolder<T> collection;
 
-    /**
-     * Public constructor provided in case clients wish to use their own
-     * CollectionHolder. This is not recommended, as the standard holders
-     * should suffice for the majority of users.
-     */
-    public ListenerSupport( Class<T> listenerClass, CollectionHolder<T> holder ) {
-        assert( listenerClass.isInterface( ) ) : "Must use a listener interface.";
-        this.listenerClass = listenerClass;
-        this.proxyClass = getProxyClass( listenerClass );
-        this.collection = holder;
+  /**
+   * Public constructor provided in case clients wish to use their own CollectionHolder. This is not
+   * recommended, as the standard holders should suffice for the majority of users.
+   */
+  public ListenerSupport(Class<T> listenerClass, CollectionHolder<T> holder) {
+    assert (listenerClass.isInterface()) : "Must use a listener interface.";
+    this.listenerClass = listenerClass;
+    this.proxyClass = getProxyClass(listenerClass);
+    this.collection = holder;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> Class<T> getProxyClass(Class<T> listenerClass) {
+    if (PROXY_CLASS_CACHE.containsKey(listenerClass)) {
+      return (Class<T>) PROXY_CLASS_CACHE.get(listenerClass);
+    }
+    Class<T> proxyClass =
+        (Class<T>) Proxy.getProxyClass(listenerClass.getClassLoader(), listenerClass);
+    PROXY_CLASS_CACHE.put(listenerClass, proxyClass);
+    return proxyClass;
+  }
+
+  /** Private constructor to support filtering. */
+  private ListenerSupport(Class<T> listenerClass, Class<T> proxyClass, CollectionHolder<T> holder) {
+    this.listenerClass = listenerClass;
+    this.proxyClass = proxyClass;
+    this.collection = holder;
+  }
+
+  public void registerListener(T listener) {
+    collection.registerListener(listener);
+  }
+
+  public void unregisterListener(T listener) {
+    collection.unregisterListener(listener);
+  }
+
+  @Override
+  public Iterator<T> iterator() {
+    return collection.iterator();
+  }
+
+  public int size() {
+    return collection.size();
+  }
+
+  /**
+   * Returns a filtered view of the current ListenerSupport which can be used to fire events to only
+   * a subset of listeners. Registrations made in this ListenerSupport will be reflected in the
+   * returned view, but listeners cannot be registered or unregistered with the view.
+   */
+  public ListenerSupport<T> filter(ListenerFilter<T> filter) {
+    return new ListenerSupport<>(
+        listenerClass, proxyClass, new FilteredCollectionHolder<>(collection, filter));
+  }
+
+  /**
+   * Returns a proxy listener that will forward all method calls to all listeners. This method fires
+   * events on the calling thread. Any exceptions thrown by listeners will be propagated from this
+   * method.<br>
+   * Note that this method, like all of the fire methods, uses reflection-based proxying and is
+   * likely unsuitable for high-performance or high-security environments.
+   */
+  public T fire() {
+    return getProxy(DefaultInvocationHandler.class);
+  }
+
+  /**
+   * Returns a proxy listener that will forward all method calls to all listeners. This method fires
+   * events asynchronously on the event dispatch thread. <b>Any exceptions thrown by listeners will
+   * be printed to System.err and then ignored!</b><br>
+   * Note that this method, like all of the fire methods, uses reflection-based proxying and is
+   * likely unsuitable for high-performance or high-security environments.
+   */
+  public T fireOnEdtLater() {
+    return getProxy(EdtLaterInvocationHandler.class);
+  }
+
+  /**
+   * Returns a proxy listener that will forward all method calls to all listeners. This method fires
+   * events synchronously on the event dispatch thread. Any exceptions thrown by listeners will be
+   * rethrown on the calling thread.<br>
+   * Note that this method, like all of the fire methods, uses reflection-based proxying and is
+   * likely unsuitable for high-performance or high-security environments.
+   */
+  public T fireOnEdtAndWait() {
+    return getProxy(EdtAndWaitInvocationHandler.class);
+  }
+
+  /**
+   * Returns a proxy listener that will forward all method calls to all listeners. This method fires
+   * events asynchronously on a worker thread. <b>Any exceptions thrown by listeners will be printed
+   * to System.err and then ignored!</b><br>
+   * Note that this method, like all of the fire methods, uses reflection-based proxying and is
+   * likely unsuitable for high-performance or high-security environments.
+   */
+  public T fireOnWtLater() {
+    return getProxy(WtLaterInvocationHandler.class);
+  }
+
+  /**
+   * Returns a proxy listener that will forward all method calls to all listeners. This method fires
+   * events asynchronously on several worker threads using the Fork/Join framework. <b>Any
+   * exceptions thrown by listeners will be printed to System.err and then ignored, but will not
+   * prevent other listeners from being executed.</b> This proxy method is best suited for large
+   * numbers of listeners or listeners which are expected to take a long time.<br>
+   * Note that this method, like all of the fire methods, uses reflection-based proxying and is
+   * likely unsuitable for high-performance or high-security environments.
+   */
+  public T fireInParallel() {
+    return getProxy(ParallelInvocationHandler.class);
+  }
+
+  /**
+   * Returns a proxy listener that will forward all method calls to all listeners using the given
+   * proxy. The exception-handling and thread-safety of the given handler are entirely dependent on
+   * the definition of the handler.
+   *
+   * <p>Note that this method, like all of the fire methods, uses reflection-based proxying and is
+   * likely unsuitable for high-performance or high-security environments.
+   */
+  protected T fireWithHandler(Class<? extends DefaultInvocationHandler<T>> cls) {
+    return getProxy(cls);
+  }
+
+  private T getProxy(Class<?> clas) {
+
+    assert DefaultInvocationHandler.class.isAssignableFrom(clas);
+
+    @SuppressWarnings("unchecked")
+    Class<? extends DefaultInvocationHandler<T>> cls =
+        (Class<? extends DefaultInvocationHandler<T>>) clas;
+
+    if (proxyCache.containsKey(cls)) {
+      return proxyCache.get(cls);
     }
 
-    @SuppressWarnings( "unchecked" )
-    private static <T> Class<T> getProxyClass( Class<T> listenerClass ) {
-        if ( PROXY_CLASS_CACHE.containsKey( listenerClass ) ) {
-            return (Class<T>)PROXY_CLASS_CACHE.get( listenerClass );
-        }
-        Class<T> proxyClass = (Class<T>)Proxy.getProxyClass( listenerClass.getClassLoader( ), listenerClass );
-        PROXY_CLASS_CACHE.put( listenerClass, proxyClass );
-        return proxyClass;
+    try {
+      Constructor<? extends DefaultInvocationHandler<T>> constructor =
+          cls.getConstructor(Iterable.class);
+      DefaultInvocationHandler<T> instance = constructor.newInstance(collection);
+      T proxy = getProxy(instance);
+      proxyCache.put(cls, proxy);
+      return proxy;
+    } catch (NoSuchMethodException
+        | SecurityException
+        | InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
+        | InvocationTargetException e) {
+      throw new ProxyException(e);
     }
+  }
 
-    /**
-     * Private constructor to support filtering.
-     */
-    private ListenerSupport( Class<T> listenerClass, Class<T> proxyClass, CollectionHolder<T> holder ) {
-        this.listenerClass = listenerClass;
-        this.proxyClass = proxyClass;
-        this.collection = holder;
+  private T getProxy(DefaultInvocationHandler<T> handler) {
+    try {
+      return proxyClass.getConstructor(InvocationHandler.class).newInstance(handler);
+    } catch (InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
+        | InvocationTargetException
+        | NoSuchMethodException
+        | SecurityException e) {
+      throw new ProxyException(e);
     }
+  }
 
-    public void registerListener( T listener ) {
-        collection.registerListener( listener );
-    }
+  /**
+   * Returns a ListenerSupport backed by a CopyOnWriteArraySet of listeners. Listeners are
+   * strongly-referenced and must be unregistered manually. This should be sufficient for most uses.
+   * ListenerSupports returned from this method are thread-safe.
+   */
+  public static <T> ListenerSupport<T> create(Class<T> listenerClass) {
+    return new ListenerSupport<>(listenerClass, new CopyOnWriteSetHolder<T>());
+  }
 
-    public void unregisterListener( T listener ) {
-        collection.unregisterListener( listener );
-    }
-
-    @Override
-    public Iterator<T> iterator( ) {
-        return collection.iterator( );
-    }
-
-    public int size( ) {
-        return collection.size( );
-    }
-
-    /**
-     * Returns a filtered view of the current ListenerSupport which can be used
-     * to fire events to only a subset of listeners. Registrations made in this
-     * ListenerSupport will be reflected in the returned view, but listeners
-     * cannot be registered or unregistered with the view.
-     */
-    public ListenerSupport<T> filter( ListenerFilter<T> filter ) {
-        return new ListenerSupport<>( listenerClass, proxyClass,
-                new FilteredCollectionHolder<>( collection, filter ) );
-    }
-
-    /**
-     * Returns a proxy listener that will forward all method calls to all listeners.
-     * This method fires events on the calling thread. Any exceptions thrown by
-     * listeners will be propagated from this method.<br>
-     *
-     * Note that this method, like all of the fire methods, uses reflection-based
-     * proxying and is likely unsuitable for high-performance or high-security
-     * environments.
-     */
-    public T fire() {
-        return getProxy( DefaultInvocationHandler.class );
-    }
-
-    /**
-     * Returns a proxy listener that will forward all method calls to all listeners.
-     * This method fires events asynchronously on the event dispatch thread. <b>Any
-     * exceptions thrown by listeners will be printed to System.err and then ignored!</b><br>
-     *
-     * Note that this method, like all of the fire methods, uses reflection-based
-     * proxying and is likely unsuitable for high-performance or high-security
-     * environments.
-     */
-    public T fireOnEdtLater() {
-        return getProxy( EdtLaterInvocationHandler.class );
-    }
-
-    /**
-     * Returns a proxy listener that will forward all method calls to all listeners.
-     * This method fires events synchronously on the event dispatch thread. Any
-     * exceptions thrown by listeners will be rethrown on the calling thread.<br>
-     *
-     * Note that this method, like all of the fire methods, uses reflection-based
-     * proxying and is likely unsuitable for high-performance or high-security
-     * environments.
-     */
-    public T fireOnEdtAndWait() {
-        return getProxy( EdtAndWaitInvocationHandler.class );
-    }
-
-    /**
-     * Returns a proxy listener that will forward all method calls to all listeners.
-     * This method fires events asynchronously on a worker thread. <b>Any
-     * exceptions thrown by listeners will be printed to System.err and then ignored!</b><br>
-     *
-     * Note that this method, like all of the fire methods, uses reflection-based
-     * proxying and is likely unsuitable for high-performance or high-security
-     * environments.
-     */
-    public T fireOnWtLater() {
-        return getProxy( WtLaterInvocationHandler.class );
-    }
-
-    /**
-     * Returns a proxy listener that will forward all method calls to all listeners.
-     * This method fires events asynchronously on several worker threads using the
-     * Fork/Join framework. <b>Any exceptions thrown by listeners will be printed
-     * to System.err and then ignored, but will not prevent other listeners from
-     * being executed.</b> This proxy method is best suited for large numbers of
-     * listeners or listeners which are expected to take a long time.<br>
-     *
-     * Note that this method, like all of the fire methods, uses reflection-based
-     * proxying and is likely unsuitable for high-performance or high-security
-     * environments.
-     */
-    public T fireInParallel() {
-        return getProxy( ParallelInvocationHandler.class );
-    }
-
-    /**
-     * Returns a proxy listener that will forward all method calls to all listeners
-     * using the given proxy. The exception-handling and thread-safety of the
-     * given handler are entirely dependent on the definition of the handler.
-     *
-     * Note that this method, like all of the fire methods, uses reflection-based
-     * proxying and is likely unsuitable for high-performance or high-security
-     * environments.
-     */
-    protected T fireWithHandler( Class<? extends DefaultInvocationHandler<T>> cls ) {
-        return getProxy( cls );
-    }
-
-    private T getProxy( Class<?> clas ) {
-
-        assert DefaultInvocationHandler.class.isAssignableFrom( clas );
-
-        @SuppressWarnings( "unchecked" )
-        Class<? extends DefaultInvocationHandler<T>> cls =
-                (Class<? extends DefaultInvocationHandler<T>>) clas;
-
-        if ( proxyCache.containsKey( cls ) ) {
-            return proxyCache.get( cls );
-        }
-
-        try {
-            Constructor<? extends DefaultInvocationHandler<T>> constructor =
-                    cls.getConstructor( Iterable.class );
-            DefaultInvocationHandler<T> instance = constructor.newInstance( collection );
-            T proxy = getProxy( instance );
-            proxyCache.put( cls, proxy );
-            return proxy;
-        }
-        catch ( NoSuchMethodException | SecurityException | InstantiationException
-                | IllegalAccessException | IllegalArgumentException |
-                InvocationTargetException e ) {
-            throw new ProxyException(e);
-        }
-    }
-
-    private T getProxy( DefaultInvocationHandler<T> handler ) {
-        try {
-            return proxyClass.getConstructor( InvocationHandler.class ).newInstance( handler );
-        }
-        catch ( InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e ) {
-            throw new ProxyException( e );
-        }
-    }
-
-    /**
-     * Returns a ListenerSupport backed by a CopyOnWriteArraySet of listeners.
-     * Listeners are strongly-referenced and must be unregistered manually.
-     * This should be sufficient for most uses. ListenerSupports returned from
-     * this method are thread-safe.
-     */
-    public static <T> ListenerSupport<T> create( Class<T> listenerClass ) {
-        return new ListenerSupport<>( listenerClass, new CopyOnWriteSetHolder<T>( ) );
-    }
-
-    /**
-     * Returns a ListenerSupport backed by a CopyOnWriteArraySet of WeakReferences
-     * to listeners. Listeners will be removed automatically as they become weakly
-     * reachable. ListenerSupports returned from this method are thread-safe.
-     */
-    public static <T> ListenerSupport<T> createWeak( Class<T> listenerClass ) {
-        return new ListenerSupport<>( listenerClass, new WeakCollectionHolder<T>( ) );
-    }
+  /**
+   * Returns a ListenerSupport backed by a CopyOnWriteArraySet of WeakReferences to listeners.
+   * Listeners will be removed automatically as they become weakly reachable. ListenerSupports
+   * returned from this method are thread-safe.
+   */
+  public static <T> ListenerSupport<T> createWeak(Class<T> listenerClass) {
+    return new ListenerSupport<>(listenerClass, new WeakCollectionHolder<T>());
+  }
 }
